@@ -92,6 +92,10 @@ chicken_import
 #count unique values in partner column
 unique_countries <- n_distinct(chicken_import$partner_desc)
 unique_countries
+```
+
+
+```{r}
 
 ```
 ##### ***There were 7 unique countries the U.S. was importing from during the 2018-2024 period.***
@@ -119,24 +123,115 @@ import_sort <- arrange(import_sum, primary_value)
 import_sort
 
 ```
-#####***The mininum value for trade imports came from Poland in 2022 at 4308 (primary value based on FOB or CIF). The maximum value came from Chile in 2022 at 428214676 primary value.***
+#####***The minimum value for trade imports came from Poland in 2022 at 4308 (primary value based on FOB or CIF). The maximum value came from Chile in 2022 at 428214676 primary value.***
+
 #### 3. Identify the top 5 countries from which the USA imported the most (qty) in the years 2018 and 2024. List the countries and their corresponding import values.
 ```{r}
+### Piping it all together
+import_2018 <- chicken %>%
+  clean_names() %>%
+  filter(flow_desc == "Import") %>%
+  filter(ref_year == "2018") %>%
+  mutate(qty_mg = qty*1000000,
+                  qty_mg= round(qty_mg, 0) )%>%
+ dplyr::select(ref_year, period, flow_desc,
+ partner_desc, qty_unit_abbr, qty, primary_value, qty_mg
+ )%>%
+  
+  arrange(
+                  qty_mg
+                  )
+
+
+import_2018
+```
+
+####***For 2018, there were only four countries with top imported values included Germany at 6.605300e+10 mg, Israel at 1.693018e+12 mg,Canada at 3.158220e+13 mg, and Chile at 4.020218e+13 mg.***
+
+
+```{r}
+###Piping it all together
+import_2024 <- chicken %>%
+  clean_names() %>%
+  filter(flow_desc == "Import") %>%
+  filter(ref_year == "2024") %>%
+  mutate(qty_mg = qty*1000000,
+                  qty_mg= round(qty_mg, 0) )%>%
+ dplyr::select(ref_year, period, flow_desc,
+ partner_desc, qty_unit_abbr, qty, primary_value, qty_mg
+)%>%
+  
+  arrange(
+                  qty_mg
+                  )
+
+
+import_2024
 
 ```
+
+####***For 2024, there were only three import countries with the top values being 1.871200e+11 mg for Mexico, 3.179255e+13 mg for Canada, and 5.530901e+13 mg for Chile.***
 
 #### 4. Calculate the total import value for the USA from each country. Which country had the highest total export value **to** US, and what was that value?
 ```{r}
+###Sum Imports Per Country
+import_total <- chicken %>%
+  clean_names() %>%
+  filter(flow_desc == "Import") %>%
+  mutate(qty_mg = qty*1000000,
+                  qty_mg= round(qty_mg, 0) )%>%
+ dplyr::select(ref_year, period, flow_desc,
+ partner_desc, qty_unit_abbr, qty, primary_value, qty_mg
+)%>%
+
+group_by(partner_desc) %>%
+summarize(sum_value = sum(primary_value))%>%
+arrange(1/sum_value)
+
+import_total
+
 
 ```
+####***The country with the largest sum export value to the US was Chile, at a primary value of 1532686723.***
+
 
 #### 5. Calculate the total import value for the USA in each year from 2018 to 2025. Which year had the highest total import value, and what was that value?
 ```{r}
+###Sum Imports Per YEAR
+import_total <- chicken %>%
+  clean_names() %>%
+  filter(flow_desc == "Import") %>%
+  mutate(qty_mg = qty*1000000,
+                  qty_mg= round(qty_mg, 0) )%>%
+ dplyr::select(ref_year, period, flow_desc,
+ partner_desc, qty_unit_abbr, qty, primary_value, qty_mg
+)%>%
+
+group_by(ref_year) %>%
+summarize(sum_value = sum(primary_value))%>%
+arrange(1/sum_value)
+
+import_total
 
 ```
+####***The year with the highest total import value was 2022 with a primary value of 566412591.***
+
 
 #### 6. Plot a line graph showing the total annual import value for the USA from 2018 to 2024. Describe any noticeable trends or patterns (e.g., increases, decreases, or fluctuations) in the graph. Create a publication ready plot.
 ```{r}
+###Total Annual Import Value, USA 2018-2024
+
+
+
+ggplot(import_total, aes(x = ref_year, y = sum_value))+
+  geom_line()+
+labs(
+    x = "Import Year",
+    y = "Total Import Value",
+    title = "Total Import Value by Year"
+  )+ 
+  theme_dark()
+
 
 ```
 
