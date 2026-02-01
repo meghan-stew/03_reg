@@ -234,38 +234,163 @@ labs(
 
 
 ```
-
+####***The figure above shows total import values by year for the US.We can see a noticeable trend from 2020 through 2022 were total import values dramatically rose, then tanked within a year as 2023 settled in. ***
 ## Exports:
 
 #### 7. How many distinct countries were there (based on given data), to where US was exporting the poultry products?
 ```{r}
+chicken_export <- chicken %>%
+clean_names() %>%
+filter(flow_desc == "Export")%>%
+mutate(qty_mg = qty*1000000,
+                  qty_mg= round(qty_mg, 0) )%>%
+ dplyr::select(ref_year, period, flow_desc,
+ partner_desc, qty_unit_abbr, qty, primary_value, qty_mg
+)
+
+chicken_export
 
 ```
+
+
+```{r}
+#count unique values in partner column
+unique_countries <- n_distinct(chicken_export$partner_desc)
+unique_countries
+```
+#####***There were 188 distinct countries that the U.S. was exporting to between 2018-2025. ***
+
 
 #### 8. What are the minimum, maximum trade values for exports? Mention the country, year and its respective value.
 ```{r}
+#summarize for mean, minimum, maximum, etc. 
+chicken_export <- chicken %>%
+clean_names() %>%
+filter(flow_desc == "Export")%>%
+mutate(qty_mg = qty*1000000,
+                  qty_mg= round(qty_mg, 0) )%>%
+ dplyr::select(ref_year, period, flow_desc,
+ partner_desc, qty_unit_abbr, qty, primary_value, qty_mg
+) %>%
+arrange(primary_value)
+
+chicken_export
+
+
 
 ```
+#####***The minimum observed trade export value (primary value) was 2900 from Czechia in 2018, while the highest was 125665699 observed as the primary value from Viet Nam in 2022. ***
+
 
 #### 9. Identify the top 5 countries to which the USA exported the most (qty) in the years 2018 and 2024. List the countries and their corresponding export values.
 ```{r}
+###Piping it all together
+export_2018 <- chicken %>%
+  clean_names() %>%
+  filter(flow_desc == "Export") %>%
+  filter(ref_year == "2018") %>%
+  mutate(qty_mg = qty*1000000,
+                  qty_mg= round(qty_mg, 0) )%>%
+ dplyr::select(ref_year, period, flow_desc,
+ partner_desc, qty_unit_abbr, qty, primary_value, qty_mg
+)%>%
+  
+  arrange(
+                  qty_mg
+                  )
+
+
+export_2018
 
 ```
+#####***In 2018, the country with the largest export quantity was Mexico at 7.928131e+14 mg, followed by China, Hong Kong SAR at 2.917131e+14 mg, Other Asia at 2.093894e+14 mg, Cuba at 2.024927e+14 mg, and Canada at 1.952350e+14 mg . ***
+
+```{r}
+###Piping it all together
+
+export_2024 <- chicken %>%
+  clean_names() %>%
+  filter(flow_desc == "Export") %>%
+  filter(ref_year == "2024") %>%
+  mutate(qty_mg = qty*1000000,
+                  qty_mg= round(qty_mg, 0) )%>%
+ dplyr::select(ref_year, period, flow_desc,
+ partner_desc, qty_mg, qty_unit_abbr, qty, primary_value
+)%>%
+  
+  arrange(
+                  1/qty_mg
+                  )
+
+
+export_2024
+
+
+```
+
+#####***In 2024, the 5 countries with the largest export quantities in mg were Mexico at 8.529040e+14 mg, followed by Cuba at 2.396432e+14	mg, Other Asia at 2.100486e+14 mg, Philippines at 1.630840e+14 mg, and Canada at 1.481891e+14	mg. ***
+
 
 #### 10. Calculate the total export value for the USA from each country. Which country had the highest total import value **from** US, and what was that value?
 ```{r}
+###Sum Exports Per Country
+export_total <- chicken %>%
+  clean_names() %>%
+  filter(flow_desc == "Export") %>%
+  mutate(qty_mg = qty*1000000,
+                  qty_mg= round(qty_mg, 0) )%>%
+ dplyr::select(ref_year, period, flow_desc,
+ partner_desc, qty_mg, qty_unit_abbr, qty, primary_value
+)%>%
 
+group_by(partner_desc) %>%
+summarize(sum_value = sum(primary_value))%>%
+arrange(1/sum_value)
+
+export_total
 ```
+
+#####***The country with the highest import value, or value exported from the US, was Mexico with a total primary trade value of 6823047519. ***
 
 #### 11. Calculate the total export value for the USA in each year from 2018 to 2025. Which year had the highest total export value, and what was that value?
 ```{r}
+###Sum Exports Per Year
+export_total <- chicken %>%
+  clean_names() %>%
+  filter(flow_desc == "Export") %>%
+  mutate(qty_mg = qty*1000000,
+                  qty_mg= round(qty_mg, 0) )%>%
+ dplyr::select(ref_year, period, flow_desc,
+ partner_desc, qty_mg, qty_unit_abbr, qty, primary_value
+)%>%
+
+group_by(ref_year) %>%
+summarize(sum_value = sum(primary_value))%>%
+arrange(1/sum_value)
+
+export_total
 
 ```
+#####***The highest net export value was observed for 2022, totaling at 5401343250 for the primary trade value. ***
+
 
 #### 12. Plot a line graph showing the total annual export value for the USA from 2018 to 2024. Describe any noticeable trends or patterns (e.g., increases, decreases, or fluctuations) in the graph. Create a publication ready plot.
 ```{r}
+###Total Annual Import Value, USA 2018-2024
+
+
+
+ggplot(export_total, aes(x = ref_year, y = sum_value))+
+  geom_line()+
+labs(
+    x = "Export Year",
+    y = "Total Export Value",
+    title = "Total Export Value by Year"
+  )+ 
+  theme_minimal()
 
 ```
+####***The above figure shows total export values by year for the U.S., with a clear increase and change in the trend being observed starting in 2020 and going through 2022, where a peak total export value is reached before a less dramatic decline in total export value begins from 2022 going into 2023 and continuing onward.***
 
 ## Imports - Exports Comparision:
 
@@ -275,12 +400,97 @@ labs(
 -   Based on number of countries US imports and exports
 -   Based on each year's import export value.
 ```{r}
+###Sum Per Export/Import
+chicken_total <- chicken %>%
+  clean_names() %>%
+  mutate(qty_mg = qty*1000000,
+                  qty_mg= round(qty_mg, 0) )%>%
+ dplyr::select(ref_year, period, flow_desc,
+ partner_desc, qty_mg, qty_unit_abbr, qty, primary_value
+)%>%
 
+group_by(flow_desc) %>%
+summarize(sum_value = sum(primary_value))%>%
+arrange(1/sum_value)
+
+chicken_total
 ```
+```{r}
+###Sum Per Export/Import
+chicken_total <- chicken %>%
+  clean_names() %>%
+  mutate(qty_mg = qty*1000000,
+                  qty_mg= round(qty_mg, 0) )%>%
+ dplyr::select(ref_year, period, flow_desc,
+ partner_desc, qty_mg, qty_unit_abbr, qty, primary_value
+)%>%
+
+group_by(flow_desc, ref_year) %>%
+summarize(sum_value = sum(primary_value))%>%
+arrange(1/sum_value)
+
+chicken_total
+```
+#####***Given that a sum trade value of 31042194412 was observed for all exports compared to only 2427597118 for all historic US imports, and given that the highest two export/import values observed per year were both for exports in 2022 and 2023, it is fair to say the U.S. is primarily in the chicken export market as a net exporter. This is further supported by the fact that they have 188 countries they export to compared to only  7 countries for imports. ***
 
 #### 14. Are the main import partners also major export destinations? Explore it based on the total import export value by countries.
 
+```{r}
+###Sum Per Export/Import
+chicken_country <- chicken %>%
+  clean_names() %>%
+  mutate(qty_mg = qty*1000000,
+                  qty_mg= round(qty_mg, 0) )%>%
+ dplyr::select(ref_year, period, flow_desc,
+ partner_desc, qty_mg, qty_unit_abbr, qty, primary_value
+)%>%
+
+group_by(flow_desc, partner_desc) %>%
+summarize(sum_value = sum(primary_value))%>%
+arrange(1/sum_value)
+
+chicken_country
+```
+```{r}
+###Sum Per Export/Import
+chicken_imp <- chicken %>%
+  clean_names() %>%
+  filter(flow_desc == "Import") %>%
+  mutate(qty_mg = qty*1000000,
+                  qty_mg= round(qty_mg, 0) )%>%
+ dplyr::select(ref_year, period, flow_desc,
+ partner_desc, qty_mg, qty_unit_abbr, qty, primary_value
+)%>%
+
+group_by(partner_desc) %>%
+summarize(sum_value = sum(primary_value))%>%
+arrange(1/sum_value)
+
+chicken_imp
+```
+```{r}
+###Sum Per Export/Import
+chicken_imp <- chicken %>%
+  clean_names() %>%
+  filter(flow_desc == "Export") %>%
+  mutate(qty_mg = qty*1000000,
+                  qty_mg= round(qty_mg, 0) )%>%
+ dplyr::select(ref_year, period, flow_desc,
+ partner_desc, qty_mg, qty_unit_abbr, qty, primary_value
+)%>%
+
+group_by(partner_desc) %>%
+summarize(sum_value = sum(primary_value))%>%
+arrange(1/sum_value)
+
+chicken_imp
+```
+
+#####***The top highest value export countries include Mexico, China, Canada, Other Asia, and Cuba. The top highest value import countries include Chile, Canada, Israel, Mexico, and Germany.Therefore there is some overlap with the main import partners such as Canada and Mexico being major export partners, but that is only 2 out 5 for the top five import and export countries based on trade value, so it is not the majority of import partners.***
+
 #### 15. Can you calculate if US is in trade surplus or trade deficit for each year from 2018-2024?
+
+
 
 $$\text{Trade surplus or deficit} = \text{Imports} - \text{Exports}$$
 ```{r}
