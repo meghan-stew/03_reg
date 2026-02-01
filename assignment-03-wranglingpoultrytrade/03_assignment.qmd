@@ -72,7 +72,7 @@ glimpse(chicken)
 ```
 
 ```{r Summary}
-summary(chicken)
+head(chicken)
 ```
 
 
@@ -123,7 +123,7 @@ import_sort <- arrange(import_sum, primary_value)
 import_sort
 
 ```
-#####***The minimum value for trade imports came from Poland in 2022 at 4308 (primary value based on FOB or CIF). The maximum value came from Chile in 2022 at 428214676 primary value.***
+##### ***The minimum value for trade imports came from Poland in 2022 at 4308 (primary value based on FOB or CIF). The maximum value came from Chile in 2022 at 428214676 primary value.***
 
 #### 3. Identify the top 5 countries from which the USA imported the most (qty) in the years 2018 and 2024. List the countries and their corresponding import values.
 ```{r}
@@ -146,7 +146,7 @@ import_2018 <- chicken %>%
 import_2018
 ```
 
-####***For 2018, there were only four countries with top imported values included Germany at 6.605300e+10 mg, Israel at 1.693018e+12 mg,Canada at 3.158220e+13 mg, and Chile at 4.020218e+13 mg.***
+#### ***For 2018, there were only four countries with top imported values included Germany at 6.605300e+10 mg, Israel at 1.693018e+12 mg,Canada at 3.158220e+13 mg, and Chile at 4.020218e+13 mg.***
 
 
 ```{r}
@@ -170,7 +170,7 @@ import_2024
 
 ```
 
-####***For 2024, there were only three import countries with the top values being 1.871200e+11 mg for Mexico, 3.179255e+13 mg for Canada, and 5.530901e+13 mg for Chile.***
+#### ***For 2024, there were only three import countries with the top values being 1.871200e+11 mg for Mexico, 3.179255e+13 mg for Canada, and 5.530901e+13 mg for Chile.***
 
 #### 4. Calculate the total import value for the USA from each country. Which country had the highest total export value **to** US, and what was that value?
 ```{r}
@@ -192,7 +192,7 @@ import_total
 
 
 ```
-####***The country with the largest sum export value to the US was Chile, at a primary value of 1532686723.***
+#### ***The country with the largest sum export value to the US was Chile, at a primary value of 1532686723.***
 
 
 #### 5. Calculate the total import value for the USA in each year from 2018 to 2025. Which year had the highest total import value, and what was that value?
@@ -214,7 +214,7 @@ arrange(1/sum_value)
 import_total
 
 ```
-####***The year with the highest total import value was 2022 with a primary value of 566412591.***
+#### ***The year with the highest total import value was 2022 with a primary value of 566412591.***
 
 
 #### 6. Plot a line graph showing the total annual import value for the USA from 2018 to 2024. Describe any noticeable trends or patterns (e.g., increases, decreases, or fluctuations) in the graph. Create a publication ready plot.
@@ -234,7 +234,7 @@ labs(
 
 
 ```
-####***The figure above shows total import values by year for the US.We can see a noticeable trend from 2020 through 2022 were total import values dramatically rose, then tanked within a year as 2023 settled in. ***
+#### ***The figure above shows total import values by year for the US.We can see a noticeable trend from 2020 through 2022 were total import values dramatically rose, then tanked within a year as 2023 settled in. ***
 ## Exports:
 
 #### 7. How many distinct countries were there (based on given data), to where US was exporting the poultry products?
@@ -258,7 +258,7 @@ chicken_export
 unique_countries <- n_distinct(chicken_export$partner_desc)
 unique_countries
 ```
-#####***There were 188 distinct countries that the U.S. was exporting to between 2018-2025. ***
+##### ***There were 188 distinct countries that the U.S. was exporting to between 2018-2025. ***
 
 
 #### 8. What are the minimum, maximum trade values for exports? Mention the country, year and its respective value.
@@ -279,7 +279,7 @@ chicken_export
 
 
 ```
-#####***The minimum observed trade export value (primary value) was 2900 from Czechia in 2018, while the highest was 125665699 observed as the primary value from Viet Nam in 2022. ***
+##### ***The minimum observed trade export value (primary value) was 2900 from Czechia in 2018, while the highest was 125665699 observed as the primary value from Viet Nam in 2022. ***
 
 
 #### 9. Identify the top 5 countries to which the USA exported the most (qty) in the years 2018 and 2024. List the countries and their corresponding export values.
@@ -303,7 +303,7 @@ export_2018 <- chicken %>%
 export_2018
 
 ```
-#####***In 2018, the country with the largest export quantity was Mexico at 7.928131e+14 mg, followed by China, Hong Kong SAR at 2.917131e+14 mg, Other Asia at 2.093894e+14 mg, Cuba at 2.024927e+14 mg, and Canada at 1.952350e+14 mg . ***
+##### ***In 2018, the country with the largest export quantity was Mexico at 7.928131e+14 mg, followed by China, Hong Kong SAR at 2.917131e+14 mg, Other Asia at 2.093894e+14 mg, Cuba at 2.024927e+14 mg, and Canada at 1.952350e+14 mg . ***
 
 ```{r}
 ###Piping it all together
@@ -328,7 +328,7 @@ export_2024
 
 ```
 
-#####***In 2024, the 5 countries with the largest export quantities in mg were Mexico at 8.529040e+14 mg, followed by Cuba at 2.396432e+14	mg, Other Asia at 2.100486e+14 mg, Philippines at 1.630840e+14 mg, and Canada at 1.481891e+14	mg. ***
+##### ***In 2024, the 5 countries with the largest export quantities in mg were Mexico at 8.529040e+14 mg, followed by Cuba at 2.396432e+14	mg, Other Asia at 2.100486e+14 mg, Philippines at 1.630840e+14 mg, and Canada at 1.481891e+14	mg. ***
 
 
 #### 10. Calculate the total export value for the USA from each country. Which country had the highest total import value **from** US, and what was that value?
@@ -350,7 +350,7 @@ arrange(1/sum_value)
 export_total
 ```
 
-#####***The country with the highest import value, or value exported from the US, was Mexico with a total primary trade value of 6823047519. ***
+##### ***The country with the highest import value, or value exported from the US, was Mexico with a total primary trade value of 6823047519. ***
 
 #### 11. Calculate the total export value for the USA in each year from 2018 to 2025. Which year had the highest total export value, and what was that value?
 ```{r}
@@ -371,7 +371,7 @@ arrange(1/sum_value)
 export_total
 
 ```
-#####***The highest net export value was observed for 2022, totaling at 5401343250 for the primary trade value. ***
+##### ***The highest net export value was observed for 2022, totaling at 5401343250 for the primary trade value. ***
 
 
 #### 12. Plot a line graph showing the total annual export value for the USA from 2018 to 2024. Describe any noticeable trends or patterns (e.g., increases, decreases, or fluctuations) in the graph. Create a publication ready plot.
@@ -390,7 +390,7 @@ labs(
   theme_minimal()
 
 ```
-####***The above figure shows total export values by year for the U.S., with a clear increase and change in the trend being observed starting in 2020 and going through 2022, where a peak total export value is reached before a less dramatic decline in total export value begins from 2022 going into 2023 and continuing onward.***
+#### ***The above figure shows total export values by year for the U.S., with a clear increase and change in the trend being observed starting in 2020 and going through 2022, where a peak total export value is reached before a less dramatic decline in total export value begins from 2022 going into 2023 and continuing onward.***
 
 ## Imports - Exports Comparision:
 
@@ -431,7 +431,7 @@ arrange(1/sum_value)
 
 chicken_total
 ```
-#####***Given that a sum trade value of 31042194412 was observed for all exports compared to only 2427597118 for all historic US imports, and given that the highest two export/import values observed per year were both for exports in 2022 and 2023, it is fair to say the U.S. is primarily in the chicken export market as a net exporter. This is further supported by the fact that they have 188 countries they export to compared to only  7 countries for imports. ***
+##### ***Given that a sum trade value of 31042194412 was observed for all exports compared to only 2427597118 for all historic US imports, and given that the highest two export/import values observed per year were both for exports in 2022 and 2023, it is fair to say the U.S. is primarily in the chicken export market as a net exporter. This is further supported by the fact that they have 188 countries they export to compared to only  7 countries for imports. ***
 
 #### 14. Are the main import partners also major export destinations? Explore it based on the total import export value by countries.
 
@@ -486,14 +486,21 @@ arrange(1/sum_value)
 chicken_imp
 ```
 
-#####***The top highest value export countries include Mexico, China, Canada, Other Asia, and Cuba. The top highest value import countries include Chile, Canada, Israel, Mexico, and Germany.Therefore there is some overlap with the main import partners such as Canada and Mexico being major export partners, but that is only 2 out 5 for the top five import and export countries based on trade value, so it is not the majority of import partners.***
+##### ***The top highest value export countries include Mexico, China, Canada, Other Asia, and Cuba. The top highest value import countries include Chile, Canada, Israel, Mexico, and Germany.Therefore there is some overlap with the main import partners such as Canada and Mexico being major export partners, but that is only 2 out 5 for the top five import and export countries based on trade value, so it is not the majority of import partners.***
 
 #### 15. Can you calculate if US is in trade surplus or trade deficit for each year from 2018-2024?
 
-
+##### ***Yes, you can using the total trade value per year for imports and exports. See the vandeley table which reports the deficits for each year. ***
 
 $$\text{Trade surplus or deficit} = \text{Imports} - \text{Exports}$$
 ```{r}
+#full_join( x y by="common ref")
+vandaley <- full_join(import_total, export_total, by="ref_year") %>%
+  mutate(deficit = sum_value.x - sum_value.y) %>%
+  select(ref_year, deficit)
+
+vandaley
+
 
 ```
 
