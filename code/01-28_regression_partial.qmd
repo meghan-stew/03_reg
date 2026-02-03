@@ -38,9 +38,6 @@ Because both the response variable (i.e., corn yield) and explanatory variable (
 
 Anytime we have this input x output **numerical** relationship, a few different patterns can emerge.
 
-```{r input output relationships figure, echo=F}
-knitr::include_graphics("../data/ior.png")
-```
 
 Talk about each of these patterns.
 
@@ -70,7 +67,9 @@ library(metrica) # for rmse
 Reading data and doing some light wrangling.  
 ```{r}
 #| message: false
-reg_dfw 
+reg_dfw <- read.csv("../data/02_reg.csv") %>%
+janitor::clean_names() %>%
+  mutate(rep = as.factor(rep))
 
 reg_dfw
 ```
@@ -94,15 +93,20 @@ summary(reg_dfw)
 Yield ranging from 7.8 to 15.6 Mg/ha.  
 
 ```{r reg exp boxplot}
-
+ggplot(data = reg_dfw, 
+       aes(x = sr_ksha, 
+           y = yield_mgha))+
+  geom_boxplot()
 ```
 
 What is going on with this boxplot?
 
 ```{r reg plot point + smooth}
-ggplot(reg_dfw, 
+ggplot(data = reg_dfw, 
        aes(x = sr_ksha, 
-           y = yield_mgha))
+           y = yield_mgha))+
+  geom_point()+
+  geom_smooth()
 
 ```
 
@@ -117,7 +121,8 @@ Our goal is to then use that model to estimate the optimum seeding rate for this
 options(contrasts = c("contr.sum", "contr.poly"))
 
 # Model fitting
-mod1_int 
+mod1_int <- lmer(yield_mgha ~ 1 + (1|rep),
+                 data = reg_dfw)
 
 # Summary
 summary(mod1_int)
@@ -127,7 +132,13 @@ summary(mod1_int)
 ## b) Model Assumptions
 ```{r mod1 augmenting}
 # Augmenting and adding perason standardized residuals
-mod1_int_aug 
+mod1_int_aug <- augment(mod1_int) %>%
+  mutate(.stresid = resid(mod1_int, 
+                          type = "pearson",
+                          scaled = T
+                          ))%>%
+  left_join(reg_dfw)
+
 
 
 mod1_int_aug
@@ -136,7 +147,15 @@ mod1_int_aug
 ### Within-group errors are iid ~ N(0, var2)
 
 ```{r mod1 Standardized Residuals vs. Fitted}
-
+ggplot(mod1_int_aug,
+       aes( x = .fitted, 
+            y = .stresid)
+) + 
+  geom_point(size = 3, 
+             alpha = .7) +
+  geom_hline(yintercept = 0,
+             color = "red"
+             )
 ```
 
 Residuals looking suspicious.
@@ -145,7 +164,10 @@ For now, let's keep going.
 
 ```{r mod1 Quantile-Quantile}
 
-
+ggplot(mod1_int_aug, 
+       aes(sample = .stresid)
+       )+
+  stat_qq()
 ```
 Some deviations at the tails, not too bad.  
 
@@ -154,7 +176,15 @@ Some deviations at the tails, not too bad.
 On this plot, looking for normality.
 
 ```{r mod1 QQ plot for Location:fRep random effects}
-mod1_int_randeff 
+mod1_int_randeff <- ranef(mod1_int)
+
+mod1_int_randeff
+
+ggplot(mod1_int_randeff,
+       aes(sample = `(Intercept)`)) + 
+  stat_qq() + 
+  stat_qq_line()
+
 
 ```
 Few observations, nothing alarming.  
@@ -174,7 +204,10 @@ ggplot(mod1_int_aug,
        aes(x = sr_ksha, 
            y = yield_mgha))+
   geom_point(size = 3, 
-             alpha = .7)
+             alpha = .7)+ 
+geom_line(aes(y = .fixed),
+          color = "blue"
+)
 ```
 
 Problem with the plot above:  
@@ -185,14 +218,18 @@ Solution:
 
 First, let's create an data set with all levels of seeding rate we want to get a prediction.  
 ```{r nd}
-nd 
+nd <- data.frame(sr_ksha = seq(40,120, 1))
 
 nd
 ```
 
 ```{r mod1 better final plot}
 # Creating predictions
-nd 
+nd <- nd %>%
+  mutate(mod1_yield_mgha = predict(mod1_int,
+                                   nd,
+                                   re.form = NA
+                                   ))
 # Creating function to bootstrap
 predict.fun <- function(mod) {
   predict(mod, 
@@ -201,14 +238,40 @@ predict.fun <- function(mod) {
 }
 
 # Bootstrapping for confidence interval
-mod1_int_boots 
+mod1_int_boots <- bootMer(mod1_int,
+                          predict.fun,
+                          nsim =200
+                          )%>%
+confint() %>%
+  as.data.frame() %>%
+  rename(mod1_int_lcl = `2.5 %`,
+         mod1_int_ucl = `97.5 %`)
+
 mod1_int_boots
 
-nd 
+nd <- nd %>%
+  bind_cols(mod1_int_boots)
 
 nd
 
 # Final plot
+ggplot(reg_dfw,
+       aes(x = sr_ksha,
+           y = yield_mgha
+           )) +
+  geom_point(size = 3,
+             alpha = 0.7) +
+  geom_line(data = nd,
+            aes(y= mod1_yield_mgha),
+            color = "forestgreen") +
+  geom_ribbon(data = nd,
+              aes(y = mod1_yield_mgha,
+                ymin = mod1_int_lcl,
+                  ymax = mod1_int_ucl),
+              fill = "gray",
+              alpha = .5
+              )
+
 
 ```
 
@@ -220,13 +283,16 @@ Next, let's try a linear (intercept + slope) model.
 
 # 4) Linear regression  
 
+
 ## a) Model  
 ```{r mod2 linear model}
 # Changing to sum-to-zero contrast
 options(contrasts = c("contr.sum", "contr.poly"))
 
 # Model fitting
-mod2_lin 
+mod2_lin <- lmer(yield_mgha ~ sr_ksha + (1|rep),
+                 data = reg_dfw
+                 )
 
 # Summary
 summary(mod2_lin)
@@ -298,7 +364,10 @@ ggplot(mod2_lin_aug,
        aes(x = sr_ksha, 
            y = yield_mgha))+
   geom_point(size = 3, 
-             alpha = .7)
+             alpha = .7)+
+  geom_line(aes(y = .fixed),
+            color = "blue")
+
 ```
 
 Problem with the plot above:  
@@ -321,7 +390,7 @@ mod2_lin_boots <- bootMer(mod2_lin,
   confint() %>%
   as.data.frame() %>%
   rename(mod2_lin_lcl = `2.5 %`,
-         mod2_lin_upl = `97.5 %`)
+         mod2_lin_ucl = `97.5 %`)
 
 
 nd <- nd %>%
@@ -340,8 +409,8 @@ ggplot(reg_dfw,
             color = "forestgreen")+
   geom_ribbon(data = nd, 
               aes(x = sr_ksha, 
-                  ymin = mod2_lin_lcl,
-                  ymax = mod2_lin_upl),
+                  ymin = `mod2_lin_lcl...6`,
+                  ymax = `mod2_lin_ucl...7`),
               fill = "gray", 
               alpha = 0.5, 
               inherit.aes = FALSE)
